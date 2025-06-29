@@ -1,5 +1,5 @@
 variable "aws_profile" {
-  description = "aws profile to use"
+  description = "nmd"
   type = string
 }
 

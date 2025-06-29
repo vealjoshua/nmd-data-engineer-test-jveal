@@ -11,6 +11,16 @@ resource "aws_s3_bucket" "input_s3" {
   force_destroy = true
 }
 
+resource "aws_s3_bucket" "output_s3" {
+  bucket = "${local.app_name}-output-bucket"
+  tags = merge({
+        Name        = "${local.app_name}-output-bucket"
+        Environment = "${var.env}"
+    }, local.default_tags
+  )
+  force_destroy = true
+}
+
 module "lambda_function" {
   source                  = "../modules/lambda"
   lambda_name             = "${local.app_name}-file-processor"
@@ -48,4 +58,27 @@ resource "aws_s3_bucket_notification" "s3_notification" {
     filter_prefix       = "*"
     filter_suffix       = ".csv"
   }
+}
+
+resource "aws_s3_bucket_policy" "output_s3_policy" {
+  bucket = aws_s3_bucket.output_s3.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowLambdaUpload"
+        Effect    = "Allow"
+        Principal = {
+          AWS = aws_iam_role.lambda_exec_role.arn
+        }
+        Action = [
+          "s3:PutObject",
+        ]
+        Resource = [
+          "${aws_s3_bucket.output_s3.arn}/*",
+        ]
+      },
+    ]
+  })
 }

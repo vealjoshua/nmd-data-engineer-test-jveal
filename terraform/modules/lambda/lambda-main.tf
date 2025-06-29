@@ -49,3 +49,37 @@ resource "aws_lambda_function" "lambda_function" {
 
   tags = var.default_tags
 }
+
+resource "aws_iam_policy" "lambda_s3_policy" {
+  name        = "lambda-s3-policy"
+  description = "Policy to allow Lambda to get objects from S3"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "s3:GetObject",
+        ]
+        Resource = [
+          "${aws_s3_bucket.input_s3.arn}/*",
+        ]
+        Effect = "Allow"
+      },
+      {
+        Action = [
+          "s3:PutObject",
+        ]
+        Resource = [
+          "${aws_s3_bucket.output_s3.arn}/*",
+        ]
+        Effect = "Allow"
+      },
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_s3_attachment" {
+  role       = aws_iam_role.lambda_exec_role.name
+  policy_arn = aws_iam_policy.lambda_s3_policy.arn
+}
