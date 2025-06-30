@@ -28,25 +28,39 @@ def get_s3_object_from_event(event : dict) -> str:
 
 def lambda_handler(event, context):
     "Lambda function to process S3 events and perform analytics on orders data"
-    # Get the bucket and key from the event
-    response = get_s3_object_from_event(event)
+    try:
+        # Get the bucket and key from the event
+        response = get_s3_object_from_event(event)
 
-    df = pd.read_csv(io.BytesIO(response['Body'].read()))
-    calculate_profit_by_order(df)
+        # Read CSV with error handling
+        try:
+            df = pd.read_csv(io.BytesIO(response['Body'].read()))
+        except pd.errors.EmptyDataError:
+            raise ValueError("Empty CSV file detected")
+        except pd.errors.ParserError:
+            raise ValueError("Invalid CSV format detected")
+        
+        calculate_profit_by_order(df)
 
-    most_profitable_region = calculate_most_profitable_region(df)
-    most_common_ship_method = find_most_common_ship_method(df)
-    number_of_orders_per_category = find_number_of_order_per_category(df)
+        most_profitable_region = calculate_most_profitable_region(df)
+        most_common_ship_method = find_most_common_ship_method(df)
+        number_of_orders_per_category = find_number_of_order_per_category(df)
 
-    print(most_profitable_region)
-    print(most_common_ship_method)
-    print(number_of_orders_per_category)
+        print(most_profitable_region)
+        print(most_common_ship_method)
+        print(number_of_orders_per_category)
 
-    most_profitable_region.to_csv('most_profitable_region.csv', index=False)
-    most_common_ship_method.to_csv('most_common_ship_method.csv', index=False)
-    number_of_orders_per_category.to_csv('number_of_orders_per_category.csv', index=False)
-    
-    output_bucket = 'output_s3'
-    s3.upload_file('most_profitable_region.csv', output_bucket, 'most_profitable_region.csv')
-    s3.upload_file('most_common_ship_method.csv', output_bucket, 'most_common_ship_method.csv')
-    s3.upload_file('number_of_orders_per_category.csv', output_bucket, 'number_of_orders_per_category.csv')
+        most_profitable_region.to_csv('most_profitable_region.csv', index=False)
+        most_common_ship_method.to_csv('most_common_ship_method.csv', index=False)
+        number_of_orders_per_category.to_csv('number_of_orders_per_category.csv', index=False)
+        
+        output_bucket = 'output_s3'
+        s3.upload_file('most_profitable_region.csv', output_bucket, 'most_profitable_region.csv')
+        s3.upload_file('most_common_ship_method.csv', output_bucket, 'most_common_ship_method.csv')
+        s3.upload_file('number_of_orders_per_category.csv', output_bucket, 'number_of_orders_per_category.csv')
+    except ValueError as e:
+        print(f"Error: {str(e)}")
+        raise
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}")
+        raise

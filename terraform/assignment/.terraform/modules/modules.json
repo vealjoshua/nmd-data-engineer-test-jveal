@@ -1,0 +1,1 @@
+{"Modules":[{"Key":"","Source":"","Dir":"."},{"Key":"ecr_repo","Source":"../modules/ecr-repo","Dir":"../modules/ecr-repo"},{"Key":"lambda_function","Source":"../modules/lambda","Dir":"../modules/lambda"}]}
