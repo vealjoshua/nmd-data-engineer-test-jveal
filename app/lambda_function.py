@@ -1,12 +1,9 @@
-import sys
-import json
-import os
 import boto3
 s3 = boto3.client('s3')
-import csv
 import io
 import pandas as pd
 from app.orders_analytics import *
+
 """
 Modify this lambda function to perform the following questions
 
@@ -14,7 +11,6 @@ Modify this lambda function to perform the following questions
 2. What shipping method is most common for each Category
 3. Output a glue table containing the number of orders for each Category and Sub Category
 """
-
 
 def get_s3_object_from_event(event : dict) -> str:
     "Returns the S3 path from the lambda event record"

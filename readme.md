@@ -46,23 +46,6 @@ This project implements a data processing pipeline using AWS Lambda and S3 to an
    terraform show
    ```
 
-### Local Development
-
-1. **Run Lambda Function Locally**
-   ```bash
-   # Ensure you have the required Python packages installed
-   pip install -r requirements.txt
-   
-   # Test the Lambda function
-   python app/lambda_function.py test_event.json
-   ```
-
-2. **Test Analytics Functions**
-   ```bash
-   # Test individual analytics functions
-   python -m unittest tests/test_orders_analytics.py
-   ```
-
 ### Project Structure
 
 ```
